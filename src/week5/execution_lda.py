@@ -64,45 +64,49 @@ wiki_docs = wiki_docs.dict_trim_by_keys(gl.text_analytics.stopwords(), exclude=T
 
 topic_model = gl.topic_model.create(wiki_docs, num_topics=10, num_iterations=200)
 
-topic_model = gl.load_model('../../data/topic_models/lda_assignment_topic_model')
-
-#1
+# topics found
 topic_model.get_topics()
 
-#2
+# 50 words from topic 3
 words_3 = topic_model.get_topics(num_words=50)
 words_3 = words_3[words_3['topic'] == 2]
 words_3['score'].sum()
 
 [x['words'] for x in topic_model.get_topics(output_type='topic_words', num_words=10)]
 
+# Plot probabilities of Top 100 Words in each Topic
 plot_probabilities_top_100(topic_model)
 
+# Plot total probability of Top 10 Words in each Topic
 plot_probabilities_top_10(topic_model)
 
-#3
+# all themes found
 themes = ['science and research','team sports','music, TV, and film','American college and politics','general politics', 'art and publishing','Business','international athletics','Great Britain and Australia','international music']
 
+# retrieve Obama article
 obama = gl.SArray([wiki_docs[int(np.where(wiki['name']=='Barack Obama')[0])]])
-pred1 = topic_model.predict(obama, output_type='probability')
-pred2 = topic_model.predict(obama, output_type='probability')
-print(gl.SFrame({'topics':themes, 'predictions (first draw)':pred1[0], 'predictions (second draw)':pred2[0]}))
 
+# average 100 probability predictions on Obama's article
 print average_predictions(topic_model, themes, obama, 100)
 
+# retrieve Bush article
 bush = gl.SArray([wiki_docs[int(np.where(wiki['name']=='George W. Bush')[0])]])
+
+# average 100 probability predictions on Bush's article
 print average_predictions(topic_model, themes, bush, 100)
 
-# 4
+# retrieve Steven Gerrard article
 gerrard = gl.SArray([wiki_docs[int(np.where(wiki['name']=='Steven Gerrard')[0])]])
 
+# average 100 probability predictions on Gerrard's article
 print average_predictions(topic_model, themes, gerrard, 100)
 
-# 5 6
+# preprocessing word count and TF IDF
 wiki['lda'] = topic_model.predict(wiki_docs, output_type='probability')
 wiki['word_count'] = gl.text_analytics.count_words(wiki['text'])
 wiki['tf_idf'] = gl.text_analytics.tf_idf(wiki['word_count'])
 
+# comparing nearest neighbors search using TF IDF and LDA result
 model_tf_idf = gl.nearest_neighbors.create(wiki, label='name', features=['tf_idf'],
                                            method='brute_force', distance='cosine')
 model_lda_rep = gl.nearest_neighbors.create(wiki, label='name', features=['lda'],
@@ -112,25 +116,21 @@ model_tf_idf.query(wiki[wiki['name'] == 'Paul Krugman'], label='name', k=10)
 
 model_lda_rep.query(wiki[wiki['name'] == 'Paul Krugman'], label='name', k=10)
 
-
+# how close Mariano Rivera is to Alex Rodriguez using TF IDF and LDA
 alex_nn = model_tf_idf.query(wiki[wiki['name'] == 'Alex Rodriguez'], label='name', k=5000)
 list(alex_nn['reference_label']).index('Mariano Rivera')
 
 alex_nn = model_lda_rep.query(wiki[wiki['name'] == 'Alex Rodriguez'], label='name', k=5000)
 list(alex_nn['reference_label']).index('Mariano Rivera')
 
-# 7 8
-topic_model.alpha
-
-topic_model.beta
-
-# 9 10
+# loading preprocessed models with high and low alpha
 tpm_low_alpha = gl.load_model('../../data/topic_models/lda_low_alpha')
 tpm_high_alpha = gl.load_model('../../data/topic_models/lda_high_alpha')
 
-a = np.sort(tpm_low_alpha.predict(obama,output_type='probability')[0])[::-1]
-b = np.sort(topic_model.predict(obama,output_type='probability')[0])[::-1]
-c = np.sort(tpm_high_alpha.predict(obama,output_type='probability')[0])[::-1]
+# max probabilities on Obama's article using low, medium and high alpha
+a = np.sort(tpm_low_alpha.predict(obama, output_type='probability')[0])[::-1]
+b = np.sort(topic_model.predict(obama, output_type='probability')[0])[::-1]
+c = np.sort(tpm_high_alpha.predict(obama, output_type='probability')[0])[::-1]
 ind = np.arange(len(a))
 width = 0.3
 

@@ -73,46 +73,52 @@ wiki = graphlab.SFrame('../../data/people_wiki.gl/')
 
 wiki['tf_idf'] = graphlab.text_analytics.tf_idf(wiki['text'])
 
-# This will take about a minute or two.
 tf_idf, map_index_to_word = sframe_to_scipy(wiki, 'tf_idf')
 
 tf_idf = normalize(tf_idf)
 
+#bipartition the entire dataset
 wiki_data = {'matrix': tf_idf, 'dataframe': wiki} # no 'centroid' for the root cluster
 left_child, right_child = bipartition(wiki_data, maxiter=100, num_runs=6, seed=1)
 
 display_single_tf_idf_cluster(left_child, map_index_to_word)
-
 display_single_tf_idf_cluster(right_child, map_index_to_word)
 
+#clusters discovered
 athletes = left_child
 non_athletes = right_child
 
+#bipartition athletes subtree
 left_child_athletes, right_child_athletes = bipartition(athletes, maxiter=100, num_runs=6, seed=1)
 
 display_single_tf_idf_cluster(left_child_athletes, map_index_to_word)
-
 display_single_tf_idf_cluster(right_child_athletes, map_index_to_word)
 
+#clusters discovered
 baseball            = left_child_athletes
 ice_hockey_football = right_child_athletes
 
+#bipartition ice hockey and football subtree
 left_child_ihs, right_child_ihs = bipartition(ice_hockey_football, maxiter=100, num_runs=6, seed=1)
+
 display_single_tf_idf_cluster(left_child_ihs, map_index_to_word)
 display_single_tf_idf_cluster(right_child_ihs, map_index_to_word)
 
+#bipartition non athletes subtree
 left_child_non_athletes, right_child_non_athletes = bipartition(non_athletes, maxiter=100, num_runs=6, seed=1)
 
 display_single_tf_idf_cluster(left_child_non_athletes, map_index_to_word)
-
 display_single_tf_idf_cluster(right_child_non_athletes, map_index_to_word)
 
+#clusters discovered
 male_non_athletes = left_child_non_athletes
 female_non_athletes = right_child_non_athletes
 
+#bipartition male and female clusters
 left_male_non_athletes, right_male_non_athletes = bipartition(male_non_athletes, maxiter=100, num_runs=6, seed=1)
 left_female_non_athletes, right_female_non_athletes = bipartition(female_non_athletes, maxiter=100, num_runs=6, seed=1)
 
+#display each subtree
 display_single_tf_idf_cluster(left_male_non_athletes, map_index_to_word)
 display_single_tf_idf_cluster(right_male_non_athletes, map_index_to_word)
 

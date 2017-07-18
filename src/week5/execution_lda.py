@@ -127,39 +127,46 @@ list(alex_nn['reference_label']).index('Mariano Rivera')
 tpm_low_alpha = gl.load_model('../../data/topic_models/lda_low_alpha')
 tpm_high_alpha = gl.load_model('../../data/topic_models/lda_high_alpha')
 
-# max probabilities on Obama's article using low, medium and high alpha
+# get max probabilities on Obama's article using low, medium and high alpha
 a = np.sort(tpm_low_alpha.predict(obama, output_type='probability')[0])[::-1]
 b = np.sort(topic_model.predict(obama, output_type='probability')[0])[::-1]
 c = np.sort(tpm_high_alpha.predict(obama, output_type='probability')[0])[::-1]
 ind = np.arange(len(a))
 width = 0.3
 
+# plot comparison between the three models
 param_bar_plot(a,b,c,ind,width,ylim=1.0,param='alpha', xlab='Topics (sorted by weight of top 100 words)',ylab='Topic Probability for Obama Article')
 
 
+# print average predictions on Paul Krugman's article using low and high alpha
 krugman = gl.SArray([wiki_docs[int(np.where(wiki['name']=='Paul Krugman')[0])]])
 
 print average_predictions(tpm_low_alpha, themes, krugman, 100)
 
 print average_predictions(tpm_high_alpha, themes, krugman, 100)
 
-# 11 12
+# save space to compare gamma
 del tpm_low_alpha
 del tpm_high_alpha
+
+# loading preprocessed models with high and low gamma
 tpm_low_gamma = gl.load_model('../../data/topic_models/lda_low_gamma')
 tpm_high_gamma = gl.load_model('../../data/topic_models/lda_high_gamma')
 
+# top 100 words
 a_top = np.sort([sum(tpm_low_gamma.get_topics(topic_ids=[i], num_words=100)['score']) for i in range(10)])[::-1]
 b_top = np.sort([sum(topic_model.get_topics(topic_ids=[i], num_words=100)['score']) for i in range(10)])[::-1]
 c_top = np.sort([sum(tpm_high_gamma.get_topics(topic_ids=[i], num_words=100)['score']) for i in range(10)])[::-1]
 
+# bottom 1000 words
 a_bot = np.sort([sum(tpm_low_gamma.get_topics(topic_ids=[i], num_words=547462)[-1000:]['score']) for i in range(10)])[::-1]
 b_bot = np.sort([sum(topic_model.get_topics(topic_ids=[i], num_words=547462)[-1000:]['score']) for i in range(10)])[::-1]
 c_bot = np.sort([sum(tpm_high_gamma.get_topics(topic_ids=[i], num_words=547462)[-1000:]['score']) for i in range(10)])[::-1]
 
 ind = np.arange(len(a))
 width = 0.3
-    
+
+# plot comparison between the three models using low, medium and high gamma
 param_bar_plot(a_top, b_top, c_top, ind, width, ylim=0.6, param='gamma',
                xlab='Topics (sorted by weight of top 100 words)', 
                ylab='Total Probability of Top 100 Words')
@@ -167,15 +174,3 @@ param_bar_plot(a_top, b_top, c_top, ind, width, ylim=0.6, param='gamma',
 param_bar_plot(a_bot, b_bot, c_bot, ind, width, ylim=0.0002, param='gamma',
                xlab='Topics (sorted by weight of bottom 1000 words)',
                ylab='Total Probability of Bottom 1000 Words')
-
-topics_low_gamma = tpm_low_gamma.get_topics(cdf_cutoff = 0.5, num_words=10000)
-
-topics_high_gamma = tpm_high_gamma.get_topics(cdf_cutoff = 0.5, num_words=10000)
-
-count_low_gama = topics_low_gamma.groupby(key_columns='topic', operations={'count': agg.COUNT()})
-
-count_high_gama = topics_high_gamma.groupby(key_columns='topic', operations={'count': agg.COUNT()})
-
-count_low_gama['count'].sum() / 10
-
-count_high_gama['count'].sum() / 10

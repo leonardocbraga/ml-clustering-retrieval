@@ -1,9 +1,6 @@
 import numpy as np
 import graphlab
 from scipy.sparse import csr_matrix
-from sklearn.metrics.pairwise import pairwise_distances
-import time
-from copy import copy
 
 def norm(x):
     sum_sq=x.dot(x.T)

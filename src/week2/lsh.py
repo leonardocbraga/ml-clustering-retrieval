@@ -28,7 +28,7 @@ def train_lsh(data, num_vector=16, seed=None):
             # If no list yet exists for this bin, assign the bin an empty list.
             table[bin_index] = []
         # Fetch the list of document ids associated with the bin and add the document id to the end.
-        table[bin_index].append(data_index) # YOUR CODE HERE
+        table[bin_index].append(data_index)
 
     model = {'data': data,
              'bin_index_bits': bin_index_bits,
@@ -69,7 +69,7 @@ def search_nearby_bins(query_bin_bits, table, search_radius=2, initial_candidate
         # Fetch the list of documents belonging to the bin indexed by the new bit vector.
         # Then add those documents to candidate_set
         if nearby_bin in table:
-            candidate_set.update(table[nearby_bin]) # YOUR CODE HERE: Update candidate_set with the documents in this bin.
+            candidate_set.update(table[nearby_bin]) #Update candidate_set with the documents in this bin.
             
     return candidate_set
 
